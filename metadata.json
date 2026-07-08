@@ -1,0 +1,6 @@
+{
+  "name": "Deeplowmark Accessories and Imports",
+  "description": "Sleek, modern e-commerce platform for Deeplowmark Accessories and Imports featuring premium imported tech accessories, fashion goods, and minimalist home items.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
