@@ -49,3 +49,20 @@ export interface FilterState {
   minRating: number;
   sortBy: 'featured' | 'price-low' | 'price-high' | 'rating';
 }
+
+export interface NewsPost {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  category: string;
+}
+
+export interface PromoBanner {
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  productId: string;
+  isActive: boolean;
+}
+

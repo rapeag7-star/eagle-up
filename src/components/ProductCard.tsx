@@ -92,7 +92,7 @@ export default function ProductCard({ product, onQuickView, onAddToCart }: Produ
             {product.name}
           </h3>
           <span className="text-amber-600 font-mono font-bold text-xs sm:text-sm shrink-0">
-            ${product.price.toFixed(2)}
+            GH₵{product.price.toFixed(2)}
           </span>
         </div>
 

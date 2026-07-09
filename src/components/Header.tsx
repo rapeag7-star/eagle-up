@@ -9,6 +9,10 @@ interface HeaderProps {
   onNavigateToHome: () => void;
   onSearchChange: (search: string) => void;
   searchTerm: string;
+  activeView?: 'home' | 'shop' | 'admin';
+  onNavigateToAdmin?: () => void;
+  logoUrl?: string;
+  logoText?: string;
 }
 
 export default function Header({
@@ -18,6 +22,10 @@ export default function Header({
   onNavigateToHome,
   onSearchChange,
   searchTerm,
+  activeView = 'home',
+  onNavigateToAdmin,
+  logoUrl = '/logo.png',
+  logoText = 'DEEPLOWMARK',
 }: HeaderProps) {
   const [showSearchInput, setShowSearchInput] = useState(false);
 
@@ -51,32 +59,54 @@ export default function Header({
         {/* Brand Logo */}
         <div 
           onClick={onNavigateToHome}
-          className="flex flex-col cursor-pointer group"
+          className="flex items-center gap-2.5 cursor-pointer group"
           id="brand-logo"
         >
-          <span className="font-extrabold text-xl tracking-tighter text-white group-hover:text-amber-500 transition-colors uppercase font-display">
-            <span className="text-amber-500">DEEP</span>LOWMARK
-          </span>
-          <span className="text-[9px] tracking-[0.3em] font-bold text-slate-400 uppercase font-mono -mt-1 group-hover:text-white transition-colors">
-            Accessories & Imports
-          </span>
+          <img 
+            src={logoUrl} 
+            alt={`${logoText} Logo`} 
+            className="w-8 h-8 object-cover rounded bg-slate-900 border border-slate-850 group-hover:border-amber-500/30 transition-colors"
+            referrerPolicy="no-referrer"
+          />
+          <div className="flex flex-col justify-center">
+            <span className="font-extrabold text-lg tracking-tighter text-white group-hover:text-amber-500 transition-colors uppercase font-display leading-none">
+              {logoText.toUpperCase() === 'DEEPLOWMARK' ? (
+                <>
+                  <span className="text-amber-500">DEEP</span>LOWMARK
+                </>
+              ) : (
+                logoText
+              )}
+            </span>
+            <span className="text-[8px] tracking-[0.25em] font-bold text-slate-400 uppercase font-mono mt-1 group-hover:text-white transition-colors leading-none">
+              Accessories & Imports
+            </span>
+          </div>
         </div>
 
         {/* Center Links */}
-        <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-slate-300">
+        <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest">
           <button 
             onClick={onNavigateToHome}
-            className="hover:text-white transition-colors duration-150 py-2 relative group"
+            className={`transition-colors duration-150 py-2 relative group cursor-pointer ${
+              activeView === 'home' ? 'text-amber-500 font-extrabold' : 'text-slate-300 hover:text-white'
+            }`}
           >
             Home
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-500 transition-all duration-300 group-hover:w-full"></span>
+            <span className={`absolute bottom-0 left-0 h-0.5 bg-amber-500 transition-all duration-300 ${
+              activeView === 'home' ? 'w-full' : 'w-0 group-hover:w-full'
+            }`}></span>
           </button>
           <button 
             onClick={onNavigateToShop}
-            className="hover:text-white transition-colors duration-150 py-2 relative group"
+            className={`transition-colors duration-150 py-2 relative group cursor-pointer ${
+              activeView === 'shop' ? 'text-amber-500 font-extrabold' : 'text-slate-300 hover:text-white'
+            }`}
           >
             Shop All
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-500 transition-all duration-300 group-hover:w-full"></span>
+            <span className={`absolute bottom-0 left-0 h-0.5 bg-amber-500 transition-all duration-300 ${
+              activeView === 'shop' ? 'w-full' : 'w-0 group-hover:w-full'
+            }`}></span>
           </button>
         </nav>
 

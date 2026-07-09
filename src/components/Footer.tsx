@@ -4,9 +4,18 @@ import { Phone, MapPin, Mail, Facebook, Sparkles, MessageSquare } from 'lucide-r
 interface FooterProps {
   onNavigateToHome: () => void;
   onNavigateToShop: () => void;
+  onNavigateToAdmin?: () => void;
+  logoUrl?: string;
+  logoText?: string;
 }
 
-export default function Footer({ onNavigateToHome, onNavigateToShop }: FooterProps) {
+export default function Footer({ 
+  onNavigateToHome, 
+  onNavigateToShop, 
+  onNavigateToAdmin,
+  logoUrl = '/logo.png',
+  logoText = 'DEEPLOWMARK'
+}: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -46,13 +55,21 @@ export default function Footer({ onNavigateToHome, onNavigateToShop }: FooterPro
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
         {/* About & Branding Column */}
         <div className="md:col-span-1.5 flex flex-col gap-4">
-          <div className="flex flex-col cursor-pointer" onClick={onNavigateToHome}>
-            <span className="font-extrabold text-2xl tracking-tight text-white">
-              DEEPLOWMARK
-            </span>
-            <span className="text-xs tracking-[0.25em] font-bold text-amber-500 uppercase font-mono -mt-1">
-              Accessories & Imports
-            </span>
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={onNavigateToHome}>
+            <img 
+              src={logoUrl} 
+              alt={`${logoText} Logo`} 
+              className="w-10 h-10 object-cover rounded bg-slate-900 border border-slate-800"
+              referrerPolicy="no-referrer"
+            />
+            <div className="flex flex-col">
+              <span className="font-extrabold text-xl tracking-tight text-white leading-none">
+                {logoText}
+              </span>
+              <span className="text-[10px] tracking-[0.25em] font-bold text-amber-500 uppercase font-mono mt-1 leading-none">
+                Accessories & Imports
+              </span>
+            </div>
           </div>
           <p className="text-slate-400 text-sm leading-relaxed mt-2">
             Deeplowmark specializes in top-tier imported products, cutting-edge electronics, fashion accents, and curated minimalist home goods. Bringing global excellence directly to you.
@@ -95,30 +112,23 @@ export default function Footer({ onNavigateToHome, onNavigateToShop }: FooterPro
           <h3 className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-4 font-sans">Explore Shop</h3>
           <ul className="space-y-3 text-xs text-slate-400">
             <li>
-              <button onClick={onNavigateToHome} className="hover:text-amber-500 transition-colors">
+              <button onClick={onNavigateToHome} className="hover:text-amber-500 transition-colors cursor-pointer text-left w-full">
                 Home Showcase
               </button>
             </li>
             <li>
-              <button onClick={onNavigateToShop} className="hover:text-amber-500 transition-colors">
+              <button onClick={onNavigateToShop} className="hover:text-amber-500 transition-colors cursor-pointer text-left w-full">
                 Product Catalog
               </button>
             </li>
-            <li>
-              <button onClick={onNavigateToShop} className="hover:text-amber-500 transition-colors">
-                Tech Accessories
-              </button>
-            </li>
-            <li>
-              <button onClick={onNavigateToShop} className="hover:text-amber-500 transition-colors">
-                Fashion Imports
-              </button>
-            </li>
-            <li>
-              <button onClick={onNavigateToShop} className="hover:text-amber-500 transition-colors">
-                Home Decor Goods
-              </button>
-            </li>
+            {onNavigateToAdmin && (
+              <li>
+                <button onClick={onNavigateToAdmin} className="text-amber-400 hover:text-amber-300 font-bold transition-colors cursor-pointer text-left w-full flex items-center gap-1">
+                  <span>Admin Portal</span>
+                  <span className="text-[8px] bg-amber-500/10 text-amber-500 px-1 py-0.5 rounded uppercase font-mono">Panel</span>
+                </button>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -164,6 +174,28 @@ export default function Footer({ onNavigateToHome, onNavigateToShop }: FooterPro
           </p>
         </div>
       </div>
+
+      {/* Admin Portal Bottom Ribbon */}
+      {onNavigateToAdmin && (
+        <div className="bg-slate-950 border-t border-slate-900/60 py-3 px-4" id="admin-portal-bottom-ribbon">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div className="flex items-center gap-2 text-[10px] text-slate-500 font-medium">
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+              <span>Deeplowmark Secure Administrative Gateway</span>
+            </div>
+            <button
+              onClick={onNavigateToAdmin}
+              className="px-4 py-1.5 bg-slate-900 hover:bg-amber-500 text-slate-400 hover:text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-md border border-slate-800 hover:border-amber-500 transition-all duration-150 flex items-center gap-1.5 cursor-pointer shadow-xs"
+              id="admin-portal-trigger-ribbon"
+            >
+              <span>Admin Portal</span>
+              <span className="text-[8px] bg-amber-500/10 text-amber-500 px-1 py-0.5 rounded font-black font-mono">
+                Panel
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
     </footer>
   );
 }

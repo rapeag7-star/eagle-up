@@ -159,7 +159,7 @@ export default function ProductQuickView({
             <div className="mt-3.5 bg-slate-50 p-3.5 rounded border border-slate-200 flex items-center justify-between">
               <div>
                 <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest block font-sans">Import Price</span>
-                <span className="text-xl font-mono font-bold text-slate-950">${product.price.toFixed(2)}</span>
+                <span className="text-xl font-mono font-bold text-slate-950">GH₵{product.price.toFixed(2)}</span>
               </div>
               <div className="text-right">
                 <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest block font-sans">Availability</span>

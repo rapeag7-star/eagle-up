@@ -16,7 +16,7 @@ import {
   UserCheck,
   X
 } from 'lucide-react';
-import { Product, CartItem, Review } from './types';
+import { Product, CartItem, Review, NewsPost, PromoBanner } from './types';
 import { PRODUCTS, CATEGORIES } from './data';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -24,21 +24,135 @@ import ProductCard from './components/ProductCard';
 import ProductQuickView from './components/ProductQuickView';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
+import AdminPanel from './components/AdminPanel';
 
 export default function App() {
   // App States
-  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(() => {
+    const saved = localStorage.getItem('deeplowmark_products');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return PRODUCTS;
+  });
+
+  const saveProducts = (newProducts: Product[]) => {
+    setProducts(newProducts);
+    localStorage.setItem('deeplowmark_products', JSON.stringify(newProducts));
+  };
+
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [activeView, setActiveView] = useState<'home' | 'shop'>('home');
+  const [activeView, setActiveView] = useState<'home' | 'shop' | 'admin'>('home');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  // Administrative Branding, News, and Advertisement States
+  const [logoUrl, setLogoUrl] = useState<string>(() => {
+    return localStorage.getItem('deeplowmark_logo_url') || '/logo.png';
+  });
+
+  const [logoText, setLogoText] = useState<string>(() => {
+    return localStorage.getItem('deeplowmark_logo_text') || 'DEEPLOWMARK';
+  });
+
+  const [news, setNews] = useState<NewsPost[]>(() => {
+    const saved = localStorage.getItem('deeplowmark_news');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return [
+      {
+        id: 'news-1',
+        title: 'New Shipment Arrival from Frankfurt',
+        category: 'Arrivals',
+        content: 'We have successfully cleared high-precision electronic imports and ultra-minimalist watch designs. Stock is now available both online and in our physical Accra hub.',
+        date: '2026-03-10'
+      },
+      {
+        id: 'news-2',
+        title: 'Medie Hub Same-Day Delivery Protocols',
+        category: 'Logistics',
+        content: 'Order before 12:00 PM for same-day delivery across Accra, Tema, and Kasoa. Standard delivery terms apply elsewhere.',
+        date: '2026-03-08'
+      }
+    ];
+  });
+
+  const [promoBanner, setPromoBanner] = useState<PromoBanner>(() => {
+    const saved = localStorage.getItem('deeplowmark_promo_banner');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return {
+      title: "Premium Tech Imports Clearance",
+      subtitle: "Sleek, tactile accessories designed to boost your desktop workspace performance. Direct clearing rates.",
+      imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1600&auto=format&fit=crop&q=80",
+      productId: "prod-1",
+      isActive: true
+    };
+  });
+
+  const saveLogoUrl = (url: string) => {
+    setLogoUrl(url);
+    localStorage.setItem('deeplowmark_logo_url', url);
+  };
+
+  const saveLogoText = (text: string) => {
+    setLogoText(text);
+    localStorage.setItem('deeplowmark_logo_text', text);
+  };
+
+  const saveNews = (newNews: NewsPost[]) => {
+    setNews(newNews);
+    localStorage.setItem('deeplowmark_news', JSON.stringify(newNews));
+  };
+
+  const savePromoBanner = (banner: PromoBanner) => {
+    setPromoBanner(banner);
+    localStorage.setItem('deeplowmark_promo_banner', JSON.stringify(banner));
+  };
+
+  // Admin Authentication State
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('deeplowmark_admin_auth') === 'true';
+  });
+  const [adminUsername, setAdminUsername] = useState<string>('');
+  const [adminPassword, setAdminPassword] = useState<string>('');
+  const [adminLoginError, setAdminLoginError] = useState<string>('');
+
+  // Admin credentials that can be updated dynamically
+  const [storedAdminUsername, setStoredAdminUsername] = useState<string>(() => {
+    return localStorage.getItem('deeplowmark_admin_username') || 'eagleup7';
+  });
+  const [storedAdminPassword, setStoredAdminPassword] = useState<string>(() => {
+    return localStorage.getItem('deeplowmark_admin_password') || 'swickeagle';
+  });
+
+  const saveAdminCredentials = (username: string, password: string) => {
+    setStoredAdminUsername(username);
+    setStoredAdminPassword(password);
+    localStorage.setItem('deeplowmark_admin_username', username);
+    localStorage.setItem('deeplowmark_admin_password', password);
+  };
+
   // Filter States
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<number>(250); // slider max
+  const [priceRange, setPriceRange] = useState<number>(1000); // slider max
   const [minRating, setMinRating] = useState<number>(0);
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'rating'>('featured');
 
@@ -118,24 +232,23 @@ export default function App() {
 
   // Add Dynamic Review
   const handleAddReview = (productId: string, newReview: Review) => {
-    setProducts((prevProducts) => {
-      return prevProducts.map((p) => {
-        if (p.id === productId) {
-          const updatedReviews = [newReview, ...p.reviews];
-          // Recalculate average rating
-          const avgRating = Number(
-            (updatedReviews.reduce((sum, r) => sum + r.rating, 0) / updatedReviews.length).toFixed(1)
-          );
-          return {
-            ...p,
-            reviews: updatedReviews,
-            reviewsCount: updatedReviews.length,
-            rating: avgRating,
-          };
-        }
-        return p;
-      });
+    const updatedProducts = products.map((p) => {
+      if (p.id === productId) {
+        const updatedReviews = [newReview, ...p.reviews];
+        // Recalculate average rating
+        const avgRating = Number(
+          (updatedReviews.reduce((sum, r) => sum + r.rating, 0) / updatedReviews.length).toFixed(1)
+        );
+        return {
+          ...p,
+          reviews: updatedReviews,
+          reviewsCount: updatedReviews.length,
+          rating: avgRating,
+        };
+      }
+      return p;
     });
+    saveProducts(updatedProducts);
 
     // If currently viewing details, update the modal product reference too
     setSelectedProduct((prev) => {
@@ -167,7 +280,7 @@ export default function App() {
   const handleResetFilters = () => {
     setSearch('');
     setSelectedCategories([]);
-    setPriceRange(250);
+    setPriceRange(1000);
     setMinRating(0);
     setSortBy('featured');
   };
@@ -187,6 +300,44 @@ export default function App() {
     setActiveView('shop');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Mount effect to parse shared product links
+  const hasParsedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (hasParsedRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const pId = params.get('productId') || params.get('share') || params.get('p');
+    if (pId) {
+      const found = products.find(p => p.id === pId);
+      if (found) {
+        hasParsedRef.current = true;
+        const action = params.get('action');
+        if (action === 'cart' || action === 'add') {
+          handleAddToCart(found, 1);
+          setActiveView('shop');
+        } else if (action === 'checkout' || action === 'buy') {
+          setCart(prev => {
+            const alreadyInCart = prev.some(item => item.product.id === found.id);
+            if (alreadyInCart) return prev;
+            return [...prev, { product: found, quantity: 1 }];
+          });
+          setIsCheckoutOpen(true);
+          setActiveView('shop');
+        } else {
+          setSelectedProduct(found);
+          setActiveView('shop');
+        }
+        
+        // Clean URL parameters for pristine user state
+        try {
+          const newUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+        } catch (e) {
+          console.warn('Could not rewrite URL history:', e);
+        }
+      }
+    }
+  }, [products]);
 
   const featuredList = useMemo(() => products.filter(p => p.featured), [products]);
   const bestSellerList = useMemo(() => products.filter(p => p.bestSeller), [products]);
@@ -211,6 +362,13 @@ export default function App() {
           setActiveView('shop');
         }}
         searchTerm={search}
+        activeView={activeView}
+        onNavigateToAdmin={() => {
+          setActiveView('admin');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        logoUrl={logoUrl}
+        logoText={logoText}
       />
 
       {/* CORE PAGE VIEWS */}
@@ -329,6 +487,76 @@ export default function App() {
               </div>
             </section>
 
+            {/* Promo Banner Advertisement (Dynamic from Admin) */}
+            {promoBanner.isActive && (
+              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 animate-fade-in" id="dynamic-promo-banner">
+                <div className="relative bg-slate-900 text-white rounded-2xl overflow-hidden shadow-xl border border-slate-800">
+                  <div className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-30" style={{ backgroundImage: `url(${promoBanner.imageUrl})` }} />
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 sm:p-12 items-center relative z-10">
+                    <div className="space-y-4">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/30 rounded-full text-amber-400 text-[10px] font-black uppercase tracking-widest font-mono">
+                        🔥 HOT SPECIAL DEEPLOWMARK PROMO
+                      </div>
+                      <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-none text-white">
+                        {promoBanner.title}
+                      </h2>
+                      <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-lg font-sans">
+                        {promoBanner.subtitle}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-3 pt-2">
+                        {promoBanner.productId && (
+                          <>
+                            <button
+                              onClick={() => {
+                                const found = products.find(p => p.id === promoBanner.productId);
+                                if (found) {
+                                  setSelectedProduct(found);
+                                } else {
+                                  alert('Product not found in current inventory catalog.');
+                                }
+                              }}
+                              className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-widest rounded transition-all cursor-pointer shadow-md"
+                            >
+                              Explore Product
+                            </button>
+                            <button
+                              onClick={() => {
+                                const found = products.find(p => p.id === promoBanner.productId);
+                                if (found) {
+                                  handleAddToCart(found, 1);
+                                  setIsCheckoutOpen(true);
+                                } else {
+                                  alert('Product not found in current inventory catalog.');
+                                }
+                              }}
+                              className="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-950 font-black text-xs uppercase tracking-widest rounded transition-all cursor-pointer shadow-md"
+                            >
+                              Buy Directly
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="hidden lg:block h-64 rounded-xl overflow-hidden border border-slate-800 shadow-lg relative bg-slate-950/50">
+                      <img 
+                        src={promoBanner.imageUrl} 
+                        alt="Promo Visual" 
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          (e.target as any).src = "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1600&auto=format&fit=crop&q=80";
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* Featured Products Grid */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
@@ -437,6 +665,45 @@ export default function App() {
                   />
                 ))}
               </div>
+            </section>
+
+            {/* Dynamic News & Announcements Section */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-t border-slate-200" id="announcements-dispatch">
+              <div className="text-center space-y-2 mb-10">
+                <span className="text-xs font-bold text-amber-600 uppercase tracking-widest font-mono">Deeplowmark Dispatch</span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">Latest Announcements & Logistics</h2>
+                <p className="text-slate-500 text-sm">Stay up-to-date with our dynamic clearing dispatches and arrival announcements.</p>
+              </div>
+
+              {news.length === 0 ? (
+                <div className="text-center text-slate-400 italic text-xs py-8 bg-white rounded-xl border border-slate-200">
+                  No active brand announcements published.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {news.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-amber-500/20 transition-all relative overflow-hidden group"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-800 font-bold font-mono text-[9px] uppercase rounded-full border border-amber-500/20">
+                            {item.category}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono font-bold">{item.date}</span>
+                        </div>
+                        <h3 className="text-slate-900 font-extrabold text-sm sm:text-base tracking-tight group-hover:text-amber-600 transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                          {item.content}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
 
             {/* Dynamic Newsletter & Trust section */}
@@ -555,20 +822,20 @@ export default function App() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-400 tracking-widest font-sans">
                       <span>Max Price Limit</span>
-                      <span className="text-slate-900 font-bold font-mono">${priceRange.toFixed(2)}</span>
+                      <span className="text-slate-900 font-bold font-mono">GH₵{priceRange.toFixed(2)}</span>
                     </div>
                     <input
                       type="range"
                       min={10}
-                      max={250}
-                      step={5}
+                      max={1000}
+                      step={10}
                       value={priceRange}
                       onChange={(e) => setPriceRange(Number(e.target.value))}
                       className="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer accent-amber-500"
                     />
                     <div className="flex justify-between text-[9px] text-slate-400 font-bold font-mono">
-                      <span>$10</span>
-                      <span>$250</span>
+                      <span>GH₵10</span>
+                      <span>GH₵1000</span>
                     </div>
                   </div>
 
@@ -679,13 +946,13 @@ export default function App() {
                     <div className="space-y-2.5">
                       <div className="flex justify-between items-center text-[10px] font-bold uppercase text-slate-400 tracking-wider">
                         <span>Max Price Limit</span>
-                        <span className="text-slate-800 font-extrabold font-mono">${priceRange.toFixed(2)}</span>
+                        <span className="text-slate-800 font-extrabold font-mono">GH₵{priceRange.toFixed(2)}</span>
                       </div>
                       <input
                         type="range"
                         min={10}
-                        max={250}
-                        step={5}
+                        max={1000}
+                        step={10}
                         value={priceRange}
                         onChange={(e) => setPriceRange(Number(e.target.value))}
                         className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-amber-500"
@@ -810,6 +1077,128 @@ export default function App() {
           </div>
         )}
 
+        {/* VIEW 3: OPERATIONS ADMIN PANEL */}
+        {activeView === 'admin' && (
+          !isAdminAuthenticated ? (
+            <div className="max-w-md mx-auto px-4 py-20 animate-fade-in" id="admin-login-view">
+              <div className="bg-slate-900 text-white rounded-2xl p-8 border border-slate-800 shadow-2xl relative overflow-hidden space-y-6">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="text-center space-y-2 relative z-10">
+                  <div className="inline-flex p-3 bg-amber-500/10 text-amber-500 rounded-full border border-amber-500/20 mb-1">
+                    <UserCheck className="w-6 h-6" />
+                  </div>
+                  <h2 className="text-xl font-extrabold tracking-tight">Merchant Access Gate</h2>
+                  <p className="text-slate-400 text-xs">
+                    Please authorize your administrative credentials to manage imports, logos, dispatches, and promotions.
+                  </p>
+                </div>
+
+                {adminLoginError && (
+                  <div className="p-3 bg-rose-500/15 border border-rose-500/30 text-rose-300 rounded-lg text-xs font-bold text-center animate-pulse">
+                    ⚠️ {adminLoginError}
+                  </div>
+                )}
+
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (adminUsername === storedAdminUsername && adminPassword === storedAdminPassword) {
+                      setIsAdminAuthenticated(true);
+                      localStorage.setItem('deeplowmark_admin_auth', 'true');
+                      setAdminUsername('');
+                      setAdminPassword('');
+                      setAdminLoginError('');
+                    } else {
+                      setAdminLoginError('Incorrect administrative username or security password.');
+                    }
+                  }}
+                  className="space-y-4 relative z-10"
+                >
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block font-sans">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={adminUsername}
+                      onChange={(e) => setAdminUsername(e.target.value)}
+                      className="w-full p-3 bg-slate-950 border border-slate-800 rounded-lg text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      placeholder="Enter username"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider block font-sans">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      className="w-full p-3 bg-slate-950 border border-slate-800 rounded-lg text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      placeholder="••••••••••••"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-amber-500 hover:bg-amber-400 text-slate-955 font-black text-xs py-3.5 rounded-xl transition-all shadow-md uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    Authorize Administrator
+                  </button>
+                </form>
+
+                <div className="text-center pt-2">
+                  <button
+                    onClick={() => {
+                      setActiveView('home');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="text-[10px] font-black uppercase text-slate-400 hover:text-white tracking-widest transition-colors cursor-pointer"
+                  >
+                    ← Return to Marketplace
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 flex justify-end">
+                <button
+                  onClick={() => {
+                    setIsAdminAuthenticated(false);
+                    localStorage.removeItem('deeplowmark_admin_auth');
+                  }}
+                  className="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/20 text-[10px] font-black uppercase tracking-widest rounded-md transition-all cursor-pointer"
+                >
+                  Logout Administrator
+                </button>
+              </div>
+              <AdminPanel 
+                products={products}
+                onUpdateProducts={saveProducts}
+                logoUrl={logoUrl}
+                onUpdateLogoUrl={saveLogoUrl}
+                logoText={logoText}
+                onUpdateLogoText={saveLogoText}
+                news={news}
+                onUpdateNews={saveNews}
+                promoBanner={promoBanner}
+                onUpdatePromoBanner={savePromoBanner}
+                adminUsername={storedAdminUsername}
+                adminPassword={storedAdminPassword}
+                onUpdateCredentials={saveAdminCredentials}
+                onClose={() => {
+                  setActiveView('shop');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            </div>
+          )
+        )}
+
       </main>
 
       {/* FOOTER SECTION with real contact coordinates */}
@@ -822,6 +1211,12 @@ export default function App() {
           setActiveView('shop');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        onNavigateToAdmin={() => {
+          setActiveView('admin');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        logoUrl={logoUrl}
+        logoText={logoText}
       />
 
       {/* QUICK VIEW MODAL COMPONENT */}

@@ -97,7 +97,7 @@ export default function CartDrawer({
                         {item.product.name}
                       </h4>
                       <p className="text-slate-300 font-mono font-bold text-xs mt-0.5">
-                        ${item.product.price.toFixed(2)}
+                        GH₵{item.product.price.toFixed(2)}
                       </p>
 
                       {/* Quantity Selectors & Delete */}
@@ -143,7 +143,7 @@ export default function CartDrawer({
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs text-slate-400">
                   <span>Bag Subtotal</span>
-                  <span className="font-mono text-white font-bold">${totalAmount.toFixed(2)}</span>
+                  <span className="font-mono text-white font-bold">GH₵{totalAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-400">
                   <span>Shipping & Delivery</span>
@@ -151,7 +151,7 @@ export default function CartDrawer({
                 </div>
                 <div className="border-t border-slate-800 my-2 pt-2.5 flex justify-between text-sm font-bold text-white">
                   <span>Estimated Total</span>
-                  <span className="font-black font-mono text-base text-amber-500">${totalAmount.toFixed(2)}</span>
+                  <span className="font-black font-mono text-base text-amber-500">GH₵{totalAmount.toFixed(2)}</span>
                 </div>
               </div>
 

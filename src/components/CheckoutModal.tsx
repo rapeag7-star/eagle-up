@@ -166,7 +166,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, onClearCart }: Ch
               {/* Order summary quick view */}
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mt-6 flex justify-between items-center">
                 <span className="text-xs font-bold text-slate-500 uppercase">Cart Subtotal ({cart.reduce((s,i)=>s+i.quantity, 0)} Items)</span>
-                <span className="font-mono font-extrabold text-slate-900 text-base">${totalAmount.toFixed(2)}</span>
+                <span className="font-mono font-extrabold text-slate-900 text-base">GH₵{totalAmount.toFixed(2)}</span>
               </div>
             </div>
           )}
@@ -391,7 +391,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, onClearCart }: Ch
               {formData.paymentMethod === 'paypal' && (
                 <div className="p-5 bg-amber-500/5 rounded-xl border border-amber-500/10 text-center space-y-3">
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    You will be securely redirected to the PayPal portal to authorize payment for <span className="font-bold">${totalAmount.toFixed(2)}</span> after clicking order below.
+                    You will be securely redirected to the PayPal portal to authorize payment for <span className="font-bold">GH₵{totalAmount.toFixed(2)}</span> after clicking order below.
                   </p>
                   <div className="inline-block px-4 py-2 bg-slate-900 text-amber-400 font-black text-xs rounded-lg uppercase tracking-wider font-sans">
                     PayPal checkout sandbox active
@@ -413,7 +413,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, onClearCart }: Ch
               {/* Total Summary */}
               <div className="border-t border-slate-100 pt-4 flex justify-between items-center text-slate-900">
                 <span className="text-xs font-extrabold text-slate-500 uppercase">Grand Total</span>
-                <span className="font-mono text-xl font-black text-slate-950">${totalAmount.toFixed(2)}</span>
+                <span className="font-mono text-xl font-black text-slate-950">GH₵{totalAmount.toFixed(2)}</span>
               </div>
 
               {/* Form Actions */}
@@ -429,7 +429,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, onClearCart }: Ch
                   type="submit"
                   className="px-6 py-3 bg-slate-950 hover:bg-amber-500 hover:text-slate-950 text-white text-xs font-extrabold rounded-lg transition-all shadow-md flex items-center gap-1.5"
                 >
-                  Confirm & Place Order — ${totalAmount.toFixed(2)}
+                  Confirm & Place Order — GH₵{totalAmount.toFixed(2)}
                 </button>
               </div>
             </form>
@@ -490,7 +490,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, onClearCart }: Ch
                           <span className="font-black text-slate-900 font-mono">[{item.quantity}x]</span>
                           <span className="font-medium">{item.product.name}</span>
                         </div>
-                        <span className="font-mono font-bold">${(item.product.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-mono font-bold">GH₵{(item.product.price * item.quantity).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -499,7 +499,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, onClearCart }: Ch
                 {/* Totals */}
                 <div className="border-t border-slate-200 pt-3 flex justify-between items-center font-bold text-slate-900">
                   <span className="text-xs">Paid Subtotal (Free Shipping)</span>
-                  <span className="font-mono text-base font-black text-slate-950">${totalAmount.toFixed(2)}</span>
+                  <span className="font-mono text-base font-black text-slate-950">GH₵{totalAmount.toFixed(2)}</span>
                 </div>
 
                 {/* Footnote with real brand details */}
